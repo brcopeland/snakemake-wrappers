@@ -31,14 +31,9 @@ if not svd_prefix:
     if not verifybamid2_found:
         raise Exception("Failed to find verifybamid2 location.")
 
-log = snakemake.log_fmt_shell(stdout=False, stderr=True)
+log = snakemake.log_fmt_shell(stdout=True, stderr=True)
 shell(
-    "gatk --java-options '{java_opts}' HaplotypeCaller {extra} "
-    "-R {snakemake.input.ref} {bams} "
-    "-ERC GVCF {bam_output} "
-    "-O {snakemake.output.gvcf} {known} {log}"
     "verifybamid2 --SVDPrefix {svd_prefix} "
-    "--Reference {snakemake.input.genome} "
-    "--BamFile {snakemake.input.bam} "
-    "> {snakemake.output} {log}"
+    "--Reference {snakemake.input.ref} "
+    "--BamFile {snakemake.input.bam} {log}"
 )
