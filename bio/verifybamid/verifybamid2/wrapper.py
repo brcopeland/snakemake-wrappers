@@ -37,3 +37,4 @@ shell(
     "--Reference {snakemake.input.ref} "
     "--BamFile {snakemake.input.bam} {log}"
 )
+os.rename("result.selfSM", snakemake.output.selfsm)
