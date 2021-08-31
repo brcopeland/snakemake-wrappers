@@ -1,0 +1,44 @@
+__author__ = "Brett Copeland"
+__copyright__ = "Copyright 2021, Brett Copeland"
+__email__ = "brcopeland@ucsd.edu"
+__license__ = "MIT"
+
+
+import os
+
+from snakemake.shell import shell
+
+svd_prefix = snakemake.params.get("svd_prefix", "")
+if not svd_prefix:
+    genome_build = snakemake.params.get("genome_build", "38")
+    if genome_build not in ("37", "38"):
+        raise Exception(
+            f"No svd_prefix given and improper {genome_build=} "
+            f"given.  Valid choices are 37,38."
+        )
+    verifybamid2_found = False
+    for path in os.getenv("PATH").split(os.path.pathsep):
+        path_to_verifybamid2 = os.path.join(path, "verifybamid2")
+        if os.path.isfile(path_to_verifybamid2):
+            verifybamid2_found = True
+            resources_directory = os.path.join(
+                os.path.basename(os.path.realpath(path_to_verifybamid2)), "resource"
+            )
+            svd_prefix = os.path.join(
+                resources_directory, f"1000g.100k.b{genome_build}.vcf.gz.dat"
+            )
+            break
+    if not verifybamid2_found:
+        raise Exception("Failed to find verifybamid2 location.")
+
+log = snakemake.log_fmt_shell(stdout=False, stderr=True)
+shell(
+    "gatk --java-options '{java_opts}' HaplotypeCaller {extra} "
+    "-R {snakemake.input.ref} {bams} "
+    "-ERC GVCF {bam_output} "
+    "-O {snakemake.output.gvcf} {known} {log}"
+    "verifybamid2 --SVDPrefix {svd_prefix} "
+    "--Reference {snakemake.input.genome} "
+    "--BamFile {snakemake.input.bam} "
+    "> {snakemake.output} {log}"
+)
