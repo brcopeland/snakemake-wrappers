@@ -25,7 +25,7 @@ if not svd_prefix:
                 os.path.dirname(os.path.realpath(path_to_verifybamid2)), "resource"
             )
             svd_prefix = os.path.join(
-                resources_directory, f"1000g.100k.b{genome_build}.vcf.gz.dat"
+                resources_directory, f"1000g.phase3.100k.b{genome_build}.vcf.gz.dat"
             )
             break
     if not verifybamid2_found:
