@@ -22,7 +22,7 @@ if not svd_prefix:
         if os.path.isfile(path_to_verifybamid2):
             verifybamid2_found = True
             resources_directory = os.path.join(
-                os.path.basename(os.path.realpath(path_to_verifybamid2)), "resource"
+                os.path.dirname(os.path.realpath(path_to_verifybamid2)), "resource"
             )
             svd_prefix = os.path.join(
                 resources_directory, f"1000g.100k.b{genome_build}.vcf.gz.dat"
