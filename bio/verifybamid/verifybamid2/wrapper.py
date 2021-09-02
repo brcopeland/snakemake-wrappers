@@ -5,6 +5,8 @@ __license__ = "MIT"
 
 
 import os
+from tempfile import TemporaryDirectory
+from shutil import move
 
 from snakemake.shell import shell
 
@@ -31,10 +33,20 @@ if not svd_prefix:
     if not verifybamid2_found:
         raise Exception("Failed to find verifybamid2 location.")
 
+# verifybamid2 outputs results to result.selfSM and result.Ancestry in the working directory, so to avoid collisions we have to run it from a temporary directory and fix the paths to inputs, outputs, and the log file
+ref_path = os.path.abspath(snakemake.input.ref)
+bam_path = os.path.abspath(snakemake.input.bam)
+selfsm_path = os.path.abspath(snakemake.output.selfsm)
+ancestry_path = os.path.abspath(snakemake.output.ancestry)
+if snakemake.log:
+    snakemake.log[0] = os.path.abspath(snakemake.log[0])
 log = snakemake.log_fmt_shell(stdout=True, stderr=True)
-shell(
-    "verifybamid2 --SVDPrefix {svd_prefix} "
-    "--Reference {snakemake.input.ref} "
-    "--BamFile {snakemake.input.bam} {log}"
-)
-os.rename("result.selfSM", snakemake.output.selfsm)
+with TemporaryDirectory() as tmp_dir:
+    os.chdir(tmp_dir)
+    shell(
+        "verifybamid2 --SVDPrefix {svd_prefix} "
+        "--Reference {ref_path} "
+        "--BamFile {bam_path} {log}"
+    )
+    move("result.selfSM", selfsm_path)
+    move("result.Ancestry", ancestry_path)
